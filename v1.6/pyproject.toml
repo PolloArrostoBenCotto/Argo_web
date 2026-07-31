@@ -1,0 +1,15 @@
+[project]
+name = "fastapi-vercel"
+version = "0.1.0"
+description = "FastAPI application deployed on Vercel"
+readme = "README.md"
+requires-python = ">=3.12"
+
+dependencies = [
+    "fastapi>=0.116.0",
+    "uvicorn>=0.35.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
