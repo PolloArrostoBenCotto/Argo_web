@@ -1,0 +1,7 @@
+@echo off
+::  setup
+cd Desktop/Argo_web
+pip install --default-timeout=100 fastapi==0.100.0 uvicorn==0.22.0 python-multipart
+:: code
+echo test app
+python -m uvicorn main:app --reload

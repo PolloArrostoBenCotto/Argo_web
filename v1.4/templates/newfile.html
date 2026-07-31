@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New File - ARGOchive</title>
+    <link rel="icon" type="image/png" href="/static/icons/favicon.png">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">ARGOchive</a>
+        <div class="navbar-menu">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/archivio" class="nav-item">Archive</a>
+            <div class="dropdown">
+                <button class="nav-item">About ▼</button>
+                <div class="dropdown-content">
+                    <a href="/#the-team">The Team</a>
+                    <a href="/#support">Support</a>
+                    <a href="/#documentation">Documentation</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container form-page">
+        <div class="form-title-row">
+            <h1 style="text-align:start;">New File</h1>
+            <button type="button" onclick="window.location.href='/archivio'">Back</button>
+        </div>
+
+        <div class="card form-card">
+            <h2>Single Upload</h2>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="titolo" required placeholder="Ex. Greek Vase from 5th Century BC">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="categoria">
+                        <option value="ceramic">Ceramic</option>
+                        <option value="organic">Organic</option>
+                        <option value="metal">Metal</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Uploader</label>
+                    <input type="text" id="uploader" required placeholder="Ex. John Doe">
+                </div>
+                <div class="form-group">
+                    <label>Discovery Date</label>
+                    <input type="text" id="data_scoperta" placeholder="Ex. 2024-05-15">
+                </div>
+                <div class="form-group">
+                    <label>Notes / Text Data</label>
+                    <textarea id="note" rows="3" placeholder="Add details..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Upload 3D File</label>
+                    <input type="file" id="file_3d" accept=".ply,.obj,.stl,.glb,.gltf,.fbx,.dae,.3ds,.off" required>
+                </div>
+                <div class="form-group">
+                    <label>Information File (.txt)</label>
+                    <input type="file" id="metadata_txt" accept=".txt">
+                </div>
+                <button type="submit">Send to Archive</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const fileInput = document.getElementById('file_3d');
+            if (!fileInput.files.length) {
+                alert('Select a 3D file before sending.');
+                return;
+            }
+
+            if (!isAllowed3D(fileInput.files[0].name)) {
+                alert('Only 3D files are accepted: .ply, .obj, .stl, .glb, .gltf, .fbx, .dae, .3ds, .off');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('titolo', document.getElementById('titolo').value);
+            formData.append('categoria', document.getElementById('categoria').value);
+            formData.append('uploader', document.getElementById('uploader').value);
+            formData.append('data_scoperta', document.getElementById('data_scoperta').value);
+            formData.append('note', document.getElementById('note').value);
+            formData.append('file_3d', fileInput.files[0]);
+            const metadataInput = document.getElementById('metadata_txt');
+            if (metadataInput.files.length) {
+                if (!metadataInput.files[0].name.toLowerCase().endsWith('.txt')) {
+                    alert('The information file must be a .txt file.');
+                    return;
+                }
+                formData.append('metadata_txt', metadataInput.files[0]);
+            }
+
+            const response = await fetch('/upload', { method: 'POST', body: formData });
+            if (response.ok) {
+                alert('Model loaded successfully!');
+                window.location.href = '/archivio';
+            } else {
+                alert('Error occurred while uploading.');
+            }
+        });
+
+        function isAllowed3D(filename) {
+            return ['.ply', '.obj', '.stl', '.glb', '.gltf', '.fbx', '.dae', '.3ds', '.off']
+                .some(ext => filename.toLowerCase().endsWith(ext));
+        }
+    </script>
+</body>
+</html>

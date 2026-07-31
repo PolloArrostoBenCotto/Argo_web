@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARGOchive</title>
+    <style>
+        @font-face {
+            font-family: 'Title';
+            src: url('files/fonts/Daydream DEMO.otf') format('opentype');
+        }
+        @font-face {
+            font-family: 'body';
+            src: url('files/fonts/mania.ttf') format('truetype');
+        }
+        :root {
+            --primary-color: #703040;
+            --secondary-color: #E1C597;
+        }
+        body { font-family: 'body'; background-color: var(--primary-color); margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { color: var(--secondary-color); font-family: 'Title'; }
+        h2 { color: var(--primary-color); margin-top: 2px; font-family: 'Title'; }
+        h3 { font-size: 30px; margin-top: 0px; font-family: 'body'; }
+        .card { background: var(--secondary-color); padding:20px; margin-top: 20px; border-radius: 6px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: var(--primary-color); }
+        input[type="text"], select, textarea { width: 100%; padding: 7px 10px 5px; border: 1px solid var(--primary-color); border-radius: 4px; box-sizing: border-box; font-family: 'body'; font-size: 14px; }
+        button { background-color: var(--primary-color); color: var(--secondary-color); padding: 9px 10px 5px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: normal; font-family: 'body'; }
+        button:hover { background-color: #5c2231; }
+        buttonIcon { background-color: var(--primary-color); padding: 7px; border: none; border-radius: 4px; cursor: pointer; }
+        buttonIcon:hover { background-color: #5c2231; }
+        .filter-btn { background-color: #963c41; margin-right: 2px; }
+        .filter-btn.active { background-color: var(--primary-color); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 15px; }
+        .grid.list { display: block; gap: 10px; margin-top: 15px; }
+        .grid.list .item-card { display: flex; align-items: center; justify-content: space-between ; gap: 15px; padding: 5px 10px; margin-bottom: 2px; }
+        .grid.list .item-card .list-content { display: flex; flex-wrap: wrap; align-items: center; gap: 15px; }
+        .grid.list .item-card h4 { font-family: 'body'; margin: 0 20px; color: #333; font-size: 18px; font-weight: bold; }
+        .grid.list .item-card h5 { font-family: 'body'; margin: 0 5px; color: #333; font-size: 18px; font-weight: normal; }
+        .item-card { background: #ffffff; padding: 15px; border-radius: 4px; border-left: 5px solid var(--primary-color); }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Load Data</h1>
+        
+        <div class="card">
+            <h2>New Upload</h2>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label>Title</label>
+                    <input type="text" id="titolo" required placeholder="Ex. Greek Vase from 5th Century BC">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <select id="categoria">
+                        <option value="ceramic">Ceramic</option>
+                        <option value="organic">Organic</option>
+                        <option value="metal">Metal</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Discovery Date</label>
+                    <input type="text" id="data_scoperta" placeholder="Ex. 2024-05-15">
+                </div>
+                <div class="form-group">
+                    <label>Notes / Text Data</label>
+                    <textarea id="note" rows="3" placeholder="Add details..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>File .PLY</label>
+                    <input type="file" id="file_3d" accept=".ply" required>
+                </div>
+                <button type="submit">Send to Archive</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2>Archive</h2>
+            <div id="controlsRow" style="display:flex; flex-wrap: wrap; align-items:center; gap:10px; margin-top:10px;">
+                <div id="filtri" style="display:flex; flex-wrap: wrap; gap:5px; align-items:center;">
+                    <button class="button filter-btn active" onclick="setFilter(this, '')">All</button>
+                    <button class="button filter-btn" onclick="setFilter(this, 'ceramic')">Ceramic</button>
+                    <button class="button filter-btn" onclick="setFilter(this, 'organic')">Organic</button>
+                    <button class="button filter-btn" onclick="setFilter(this, 'metal')">Metal</button>
+                    <button class="button filter-btn" onclick="setFilter(this, 'other')">Other</button>
+                </div>
+                <div id="viewControls" style="margin-left:auto; display:flex; gap:5px;">
+                    <buttonIcon class="button filter-btn active" onclick="setView('grid', this)">
+                        <img src="files/icons/grid.png" alt="Grid view icon" style="width:20px; height:20px; vertical-align:middle;">
+                    </buttonIcon>
+                    <buttonIcon class="buttonIcon filter-btn" onclick="setView('list', this)">
+                        <img src="files/icons/list.png" alt="List view icon" style="width:20px; height:20px; vertical-align:middle;">
+                    </buttonIcon>
+                </div>
+            </div>
+            
+            <div class="grid" id="listaModelli"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentFilter = '';
+        let currentView = 'grid';
+
+        // Gestione dell'invio del Form a FastAPI
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('titolo', document.getElementById('titolo').value);
+            formData.append('categoria', document.getElementById('categoria').value);
+            formData.append('data_scoperta', document.getElementById('data_scoperta').value);
+            formData.append('note', document.getElementById('note').value);
+            formData.append('file_3d', document.getElementById('file_3d').files[0]);
+
+            const response = await fetch('/upload', { method: 'POST', body: formData });
+            if (response.ok) {
+                alert('Model loaded successfully!');
+                document.getElementById('uploadForm').reset();
+                caricaModelli(currentFilter); // Reload the list
+            } else {
+                alert('Error occurred while uploading.');
+            }
+        });
+
+        // Function to request the list of models from FastAPI (filtered or not)
+        async function caricaModelli(categoria) {
+            let url = '/modelli';
+            if (categoria) url += `?categoria=${categoria}`;
+            
+            const response = await fetch(url);
+            const modelli = await response.json();
+            
+            const lista = document.getElementById('listaModelli');
+            lista.innerHTML = '';
+            lista.classList.toggle('list', currentView === 'list');
+
+            modelli.forEach(m => {
+                if (currentView === 'list') {
+                    lista.innerHTML += `
+                        <div class="item-card">
+                            <div class="list-content">
+                                <h4>${m.titolo}</h4>
+                                <h5>${m.categoria}</h5>
+                                <h5>${m.data_scoperta || 'No specific date available.'}</h5>
+                                <h5>${m.note || 'No notes available.'}</h5>
+                            </div>
+                            <button onclick="window.location.href='/download/${m.id}'">Download .PLY</button>
+                        </div>
+                    `;
+                } else {
+                    lista.innerHTML += `
+                        <div class="item-card">
+                            <h3>${m.titolo}</h3>
+                            <p><strong>Category:</strong> ${m.categoria}</p>
+                            <p><strong>Discovery Date:</strong> ${m.data_scoperta || 'No specific date available.'}</p>
+                            <p>${m.note || 'No notes available.'}</p>
+                            <button onclick="window.location.href='/download/${m.id}'">Download .PLY</button>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // Imposta il filtro attivo e carica i modelli
+        function setFilter(btn, categoria) {
+            currentFilter = categoria;
+            const container = document.getElementById('filtri');
+            Array.from(container.querySelectorAll('.filter-btn')).forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            caricaModelli(categoria);
+        }
+
+        function setView(view, btn) {
+            currentView = view;
+            const container = document.getElementById('viewControls');
+            Array.from(container.querySelectorAll('.filter-btn')).forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            caricaModelli(currentFilter);
+        }
+
+        // Carica tutti i modelli quando si apre la pagina
+        caricaModelli('');
+    </script>
+</body>
+</html>

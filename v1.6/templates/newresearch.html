@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Research - ARGOchive</title>
+    <link rel="icon" type="image/png" href="/static/icons/favicon.png">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">ARGOchive</a>
+        <div class="navbar-menu">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/archivio" class="nav-item">Archive</a>
+            <div class="dropdown">
+                <button class="nav-item">About ▼</button>
+                <div class="dropdown-content">
+                    <a href="/theTeam">The Team</a>
+                    <a href="/support">Support</a>
+                    <a href="/#documentation">Documentation</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container form-page research-page">
+        <div class="form-title-row">
+            <h1 style="text-align:start;">New Research</h1>
+            <button type="button" onclick="window.location.href='/archivio'">Back</button>
+        </div>
+
+        <div class="card form-card wide-form-card">
+            <h2>Correlation Scan</h2>
+            <form id="researchForm">
+                <div class="research-modes" role="radiogroup" aria-label="Research mode">
+                    <label class="mode-option">
+                        <input type="radio" name="mode" value="free" checked>
+                        <span>Free Search</span>
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="mode" value="category">
+                        <span>Category Search</span>
+                    </label>
+                    <label class="mode-option">
+                        <input type="radio" name="mode" value="specific">
+                        <span>Specific Search</span>
+                    </label>
+                </div>
+
+                <div class="form-group">
+                    <label>Research Focus</label>
+                    <textarea id="query" rows="3" placeholder="Optional: site name, pattern, texture, depth, material clues..."></textarea>
+                </div>
+
+                <div class="research-fields">
+                    <div class="form-group conditional-field" id="categoryField">
+                        <label>Category</label>
+                        <select id="categorySelect"></select>
+                    </div>
+                    <div class="form-group conditional-field" id="targetField">
+                        <label>Archive Item</label>
+                        <select id="targetSelect"></select>
+                    </div>
+                </div>
+
+                <button type="submit">Run Scan</button>
+            </form>
+        </div>
+
+        <div class="card form-card wide-form-card research-results-card">
+            <h2>Results</h2>
+            <div id="researchStatus" class="research-status">Choose a mode and run a scan.</div>
+            <div id="researchResults" class="research-results"></div>
+        </div>
+    </div>
+
+    <script>
+        const categoryField = document.getElementById('categoryField');
+        const targetField = document.getElementById('targetField');
+        const categorySelect = document.getElementById('categorySelect');
+        const targetSelect = document.getElementById('targetSelect');
+        const statusBox = document.getElementById('researchStatus');
+        const resultsBox = document.getElementById('researchResults');
+
+        async function loadOptions() {
+            const [modelsResponse, categoriesResponse] = await Promise.all([
+                fetch('/modelli'),
+                fetch('/categories')
+            ]);
+            const models = await modelsResponse.json();
+            const categories = await categoriesResponse.json();
+
+            categorySelect.innerHTML = categories.length
+                ? categories.map(category => `<option value="${escapeAttribute(category)}">${escapeHtml(titleCase(category))}</option>`).join('')
+                : '<option value="">No categories available</option>';
+
+            targetSelect.innerHTML = models.length
+                ? models.map(model => `
+                    <option value="${escapeAttribute(model.id)}">
+                        ${escapeHtml(model.titolo)} (${escapeHtml(model.categoria)})
+                    </option>
+                `).join('')
+                : '<option value="">No archive items available</option>';
+        }
+
+        function updateModeFields() {
+            const mode = selectedMode();
+            categoryField.classList.toggle('visible', mode === 'category');
+            targetField.classList.toggle('visible', mode === 'specific');
+        }
+
+        function selectedMode() {
+            return document.querySelector('input[name="mode"]:checked').value;
+        }
+
+        document.querySelectorAll('input[name="mode"]').forEach(input => {
+            input.addEventListener('change', updateModeFields);
+        });
+
+        document.getElementById('researchForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            statusBox.textContent = 'Scanning archive correlations...';
+            resultsBox.innerHTML = '';
+
+            const mode = selectedMode();
+            const payload = {
+                mode,
+                query: document.getElementById('query').value,
+                category: mode === 'category' ? categorySelect.value : '',
+                target_id: mode === 'specific' ? targetSelect.value : ''
+            };
+
+            const response = await fetch('/research', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                statusBox.textContent = 'The scan could not be completed.';
+                return;
+            }
+
+            const data = await response.json();
+            statusBox.textContent = data.message || 'Scan completed.';
+            renderResults(data.matches || []);
+        });
+
+        function renderResults(matches) {
+            if (!matches.length) {
+                resultsBox.innerHTML = '<div class="empty-result">No correlations found yet.</div>';
+                return;
+            }
+
+            resultsBox.innerHTML = matches.map(item => `
+                <div class="result-card">
+                    <div class="result-score">${item.score}%</div>
+                    <div class="result-body">
+                        <h3>${escapeHtml(item.source.titolo)} <span>matched with</span> ${escapeHtml(item.match.titolo)}</h3>
+                        <div class="result-meta">
+                            ${escapeHtml(item.source.categoria)} / ${escapeHtml(item.match.categoria)}
+                        </div>
+                        <div class="result-reasons">
+                            ${(item.reasons && item.reasons.length ? item.reasons : ['weak but measurable archive similarity'])
+                                .map(reason => `<span>${escapeHtml(reason)}</span>`).join('')}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function escapeHtml(text) {
+            return String(text || '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char]));
+        }
+
+        function escapeAttribute(text) {
+            return escapeHtml(text);
+        }
+
+        function titleCase(text) {
+            return String(text || '').replace(/\b\w/g, char => char.toUpperCase());
+        }
+
+        loadOptions();
+        updateModeFields();
+    </script>
+</body>
+</html>

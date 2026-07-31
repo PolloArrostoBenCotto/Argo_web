@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search results - ARGOchive</title>
+    <link rel="icon" type="image/png" href="/static/icons/favicon.png">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">ARGOchive</a>
+        <div class="navbar-menu">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/archivio" class="nav-item">Archive</a>
+            <div class="dropdown">
+                <button class="nav-item">About &#9660;</button>
+                <div class="dropdown-content">
+                    <a href="/theTeam">The Team</a>
+                    <a href="/support">Support</a>
+                    <a href="/#documentation">Documentation</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container archive-container">
+        <div class="archive-title-row">
+            <h1 style="text-align: start;">Search results</h1>
+            <form class="archive-search open" id="archiveSearch" action="/search" method="get">
+                <button class="search-button" type="button" aria-label="Toggle search" aria-expanded="true" onclick="toggleSearch()"><img src="/static/icons/search.png" alt="" style="width:24px; height:24px;"></button>
+                <input id="searchInput" name="q" type="search" aria-label="Search archive" placeholder="Search" value="{{ query }}" required>
+            </form>
+        </div>
+
+        <div class="archive-layout fullscreen-archive">
+            <div class="card archive-card">
+                {% if query %}
+                    <h2 class="search-results-summary">{{ results|length }} result{% if results|length != 1 %}s{% endif %} for &ldquo;{{ query }}&rdquo;</h2>
+                    {% if results %}
+                        <div class="grid">
+                            {% for model in results %}
+                                <div class="item-card archive-item">
+                                    <div class="preview-box">Preview</div>
+                                    <div class="archive-details">
+                                        <h3><strong>{{ model.titolo }}</strong> - {{ model.categoria }}</h3>
+                                        <b>{{ model.data_scoperta or 'No specific date available.' }}</b>
+                                        {% if model.note %}<p>{{ model.note }}</p>{% endif %}
+                                    </div>
+                                    <div class="more">
+                                        <a class="more-button" href="/download/{{ model.id }}" aria-label="Download {{ model.titolo }}"><img src="/static/icons/more.png" alt="Download" style="width:15px; height:15px;"></a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="search-empty-state">No archive items match this search.</p>
+                    {% endif %}
+                {% else %}
+                    <p class="search-empty-state">Enter a term above to search the archive.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleSearch() {
+            const search = document.getElementById('archiveSearch');
+            const button = search.querySelector('.search-button');
+            const isOpen = search.classList.toggle('open');
+            button.setAttribute('aria-expanded', String(isOpen));
+            if (isOpen) document.getElementById('searchInput').focus();
+        }
+
+        document.addEventListener('click', event => {
+            const search = document.getElementById('archiveSearch');
+            if (!search.contains(event.target)) {
+                search.classList.remove('open');
+                search.querySelector('.search-button').setAttribute('aria-expanded', 'false');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Team - ARGOchive</title>
+    <link rel="icon" type="image/png" href="/static/icons/favicon.png">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">ARGOchive</a>
+        <div class="navbar-menu">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/archivio" class="nav-item">Archive</a>
+            <div class="dropdown">
+                <button class="nav-item">About ▼</button>
+                <div class="dropdown-content">
+                    <a href="/theTeam">The Team</a>
+                    <a href="/support">Support</a>
+                    <a href="/#documentation">Documentation</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container form-page research-page">
+        <div class="form-title-row">
+            <h1 style="text-align:start;">The Team</h1>
+            <button type="button" onclick="window.location.href='/'">Home</button>
+        </div>
+
+        <div class="team-layout team-full">
+            <div class="card team-member" onclick="window.location.href='/theTeam/Liliana'">
+                <img src="/static/images/lilly.jpg" style="width: 250px; height: 250px; border: 5px solid var(--primary-color); border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="Liliana Albanese">
+                <h7>Liliana Albanese</h7>
+                <p style="font-style: italic; font-size: 20;">Project Manager</p>
+            </div>
+            <div class="card team-member" onclick="window.location.href='/theTeam/Rossella'">
+                <img src="/static/images/ross.jpg" style="width: 250px; height: 250px; border: 5px solid var(--primary-color); border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="Rossella Fumai">
+                <h7>Rossella Fumai</h7>
+                <p style="font-style: italic; font-size: 20;">Software & Graphics</p>
+            </div>
+            <div class="card team-member" onclick="window.location.href='/theTeam/Simone'">
+                <img src="/static/images/simo.jpg" style="width: 250px; height: 250px; border: 5px solid var(--primary-color); border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" alt="Simone Gismondi">
+                <h7>Simone Gismondi</h7>
+                <p style="font-style: italic; font-size: 20;">Hardware & Mechanics</p>
+            </div>
+        </div>
+
+        <div class="team-text">
+            <p>Drirectly from Edoardo Amaldi school in Bitetto, Italy, three talented students have come together to create the ARGOchive project.</p>
+        </div>
+    </div>
+
+    <script>
+    </script>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Folder - ARGOchive</title>
+    <link rel="icon" type="image/png" href="/static/icons/favicon.png">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">ARGOchive</a>
+        <div class="navbar-menu">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/archivio" class="nav-item">Archivio</a>
+            <div class="dropdown">
+                <button class="nav-item">About ▼</button>
+                <div class="dropdown-content">
+                    <a href="/#the-team">The Team</a>
+                    <a href="/#support">Support</a>
+                    <a href="/#documentation">Documentation</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container form-page">
+        <div class="form-title-row">
+            <h1 style="text-align:start;">New Folder</h1>
+            <button type="button" onclick="window.location.href='/archivio'">Back</button>
+        </div>
+
+        <div class="card form-card wide-form-card">
+            <h2>Grouped Upload</h2>
+            <form id="folderForm">
+                <div class="folder-fields">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="titolo_cartella" required placeholder="Ex. North trench excavation">
+                    </div>
+                    <div class="form-group">
+                        <label>Excavation Date</label>
+                        <input type="text" id="data_scavo" placeholder="Ex. 2026-06-18">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Notes</label>
+                    <textarea id="note_cartella" rows="3" placeholder="General notes for this group..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Upload File / Folder</label>
+                    <input type="file" id="folder_files" multiple webkitdirectory directory>
+                </div>
+
+                <div class="folder-actions">
+                    <button type="button" onclick="document.getElementById('folder_files').removeAttribute('webkitdirectory'); document.getElementById('folder_files').removeAttribute('directory'); document.getElementById('folder_files').click();">Choose Files</button>
+                    <button type="button" onclick="document.getElementById('folder_files').setAttribute('webkitdirectory', ''); document.getElementById('folder_files').setAttribute('directory', ''); document.getElementById('folder_files').click();">Choose Folder</button>
+                </div>
+
+                <div class="upload-table-wrap">
+                    <table class="upload-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Category</th>
+                                <th>Dating Approximation</th>
+                                <th>Notes</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody id="fileRows">
+                            <tr class="empty-row">
+                                <td colspan="5">No files selected yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <button type="submit">Send Folder to Archive</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let selectedFiles = [];
+
+        const fileInput = document.getElementById('folder_files');
+        const rows = document.getElementById('fileRows');
+
+        fileInput.addEventListener('change', () => {
+            const incoming = Array.from(fileInput.files);
+            selectedFiles = selectedFiles.concat(incoming);
+            fileInput.value = '';
+            renderRows();
+        });
+
+        function renderRows() {
+            rows.innerHTML = '';
+
+            if (!selectedFiles.length) {
+                rows.innerHTML = '<tr class="empty-row"><td colspan="5">No files selected yet.</td></tr>';
+                return;
+            }
+
+            selectedFiles.forEach((file, index) => {
+                const cleanName = file.name.replace(/\.[^/.]+$/, '');
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><input type="text" class="row-title" value="${escapeAttribute(cleanName)}"></td>
+                    <td>
+                        <select class="row-category">
+                            <option value="ceramic">Ceramic</option>
+                            <option value="organic">Organic</option>
+                            <option value="metal">Metal</option>
+                            <option value="other" selected>Other</option>
+                        </select>
+                    </td>
+                    <td><input type="text" class="row-date" placeholder="Ex. 5th Century BC"></td>
+                    <td><textarea class="row-note" rows="2" placeholder="Notes..."></textarea></td>
+                    <td><button type="button" class="delete-action" onclick="removeFile(${index})">Delete</button></td>
+                `;
+                rows.appendChild(tr);
+            });
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            renderRows();
+        }
+
+        function escapeAttribute(text) {
+            return String(text).replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char]));
+        }
+
+        document.getElementById('folderForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            if (!selectedFiles.length) {
+                alert('Select at least one file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('titolo_cartella', document.getElementById('titolo_cartella').value);
+            formData.append('data_scavo', document.getElementById('data_scavo').value);
+            formData.append('note_cartella', document.getElementById('note_cartella').value);
+
+            const tableRows = Array.from(rows.querySelectorAll('tr:not(.empty-row)'));
+            tableRows.forEach((row, index) => {
+                formData.append('files', selectedFiles[index]);
+                formData.append('titoli', row.querySelector('.row-title').value);
+                formData.append('categorie', row.querySelector('.row-category').value);
+                formData.append('datazioni', row.querySelector('.row-date').value);
+                formData.append('note_file', row.querySelector('.row-note').value);
+            });
+
+            const response = await fetch('/upload-folder', { method: 'POST', body: formData });
+            if (response.ok) {
+                alert('Folder loaded successfully!');
+                window.location.href = '/archivio';
+            } else {
+                alert('Error occurred while uploading the folder.');
+            }
+        });
+    </script>
+</body>
+</html>

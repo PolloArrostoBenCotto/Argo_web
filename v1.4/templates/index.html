@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARGOchive</title>
+    
+    <link rel="icon" type="image/png" href="/static/icons/favicon.png">
+    
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">ARGOchive</a>
+        <div class="navbar-menu">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/archivio" class="nav-item">Archive</a>
+            <div class="dropdown">
+                <button class="nav-item">About ▼</button>
+                <div class="dropdown-content">
+                    <a href="#the-team">The Team</a>
+                    <a href="#support">Support</a>
+                    <a href="/#documentation">Documentation</a>
+                </div>
+            </div>
+        </div>
+        <!--
+        <div class="navbar-auth">
+            <a href="#login" class="btn-auth">Log in</a>
+        </div>
+        -->
+    </nav>
+
+    <div class="container">
+        <div class="hero-section">
+            <h1>HALVE THE TIME, DOUBLE THE RESULTS!</h1>
+            <p class="hero-subtitle">An Archeo-Helper made to study even the smallest pieces of history on site!</p>
+            <button onclick="window.location.href='/archivio'">Go to Archive</button>
+        </div>
+
+        <div class="row-features">
+            <div class="feature-box">
+                <h4>THE DESIGN</h4>
+                <b>Digital structural blueprint and optimization.</b>
+            </div>
+            <div class="feature-box">
+                <h4>THE HARDWARE</h4>
+                <b>Sensors, laser scanners and local processing unit.</b>
+            </div>
+            <div class="feature-box">
+                <h4>THE SOFTWARE</h4>
+                <b>FastAPI Backend, 3D point cloud rendering and processing.</b>
+            </div>
+        </div>
+
+        <div class="card" id="the-team">
+            <h5 onclick="window.location.href='/theTeam'">THE TEAM</h5>
+            <h6>We are high-school students with a passion for robotics and mechanics, working to bring the world new, fresh and original innovations!</h6>
+        </div>
+
+        <div class="card" id="support">
+            <h5 onclick="window.location.href='/support'">SUPPORT US</h5>
+            <h6>Making these projects takes time and commitment. Our school helps how it can, but supporters are always welcome!</h6>
+        </div>
+        <div class="card" id="documentation">
+            <h5 onclick="window.location.href='/documentation'">DOCUMENTATION</h5>
+            <h6>We have made a complete documentation of the project, from the design to the software. You can download it here!            </h6>
+            <button onclick="window.location.href='/downloadDocumentation'">Download <img src="/static/icons/page.png" alt="page" style="width:20px; height:20px; vertical-align: -3px;">
+                    </button>
+        </div>
+
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARGOchive</title>
+    
+    <link rel="icon" type="image/png" href="/static/icons/favicon.png">
+    
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="navbar-brand">ARGOchive</a>
+        <div class="navbar-menu">
+            <a href="/" class="nav-item">Home</a>
+            <a href="/archivio" class="nav-item">Archivio</a>
+            <div class="dropdown">
+                <button class="nav-item">About ▼</button>
+                <div class="dropdown-content">
+                    <a href="/#the-team">The Team</a>
+                    <a href="/#support">Support</a>
+                    <a href="/#documentation">Documentation</a>
+                </div>
+            </div>
+        <!--
+        <div class="navbar-auth">
+            <a href="#login" class="btn-auth">Log in</a>
+        </div>
+        -->
+    </nav>
+
+    <div class="container">
+        <h1 style="text-align: start;">Archive</h1>
+
+        <div class="archive-layout">
+            <!-- Archive Card (3 parts) -->
+            <div class="card archive-card">
+                
+                <div id="controlsRow" style="display:flex; flex-wrap: wrap; align-items:center; gap:10px; margin-bottom:30px;">
+                    <div id="filtri" style="display:flex; flex-wrap: wrap; gap:5px; align-items:center; ">
+                        <button class="button filter-btn active" onclick="setFilter(this, '')">All</button>
+                        <button class="button filter-btn" onclick="setFilter(this, 'ceramic')">Ceramic</button>
+                        <button class="button filter-btn" onclick="setFilter(this, 'organic')">Organic</button>
+                        <button class="button filter-btn" onclick="setFilter(this, 'metal')">Metal</button>
+                        <button class="button filter-btn" onclick="setFilter(this, 'other')">Other</button>
+                    </div>
+                    
+                    <div id="viewControls" style="margin-left:auto; display:flex; gap:5px;">
+                        <buttonIcon class="button filter-btn active" onclick="setView('grid', this)">
+                            <img src="/static/icons/grid.png" alt="Grid view icon" style="width:20px; height:20px; vertical-align:middle;">
+                        </buttonIcon>
+                        <buttonIcon class="buttonIcon filter-btn" onclick="setView('list', this)">
+                            <img src="/static/icons/list.png" alt="List view icon" style="width:20px; height:20px; vertical-align:middle;">
+                        </buttonIcon>
+                    </div>
+                </div>
+                
+                <div class="grid" id="listaModelli"></div>
+            </div>
+            
+            <!-- New Upload Card (1 part) -->
+            <div class="card upload-card">
+                <h2>New Upload</h2>
+                <form id="uploadForm">
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" id="titolo" required placeholder="Ex. Greek Vase from 5th Century BC">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="categoria">
+                            <option value="ceramic">Ceramic</option>
+                            <option value="organic">Organic</option>
+                            <option value="metal">Metal</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Discovery Date</label>
+                        <input type="text" id="data_scoperta" placeholder="Ex. 2024-05-15">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes / Text Data</label>
+                        <textarea id="note" rows="3" placeholder="Add details..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Upload File</label>
+                        <input type="file" id="file_3d" required>
+                    </div>
+                    <button type="submit">Send to Archive</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        let currentFilter = '';
+        let currentView = 'grid'; // Teniamo traccia della vista corrente
+
+        // Gestione dell'invio del Form
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('titolo', document.getElementById('titolo').value);
+            formData.append('categoria', document.getElementById('categoria').value);
+            formData.append('data_scoperta', document.getElementById('data_scoperta').value);
+            formData.append('note', document.getElementById('note').value);
+            formData.append('file_3d', document.getElementById('file_3d').files[0]);
+
+            const response = await fetch('/upload', { method: 'POST', body: formData });
+            if (response.ok) {
+                alert('Model loaded successfully!');
+                document.getElementById('uploadForm').reset();
+                caricaModelli(currentFilter);
+            } else {
+                alert('Error occurred while uploading.');
+            }
+        });
+
+        // Funzione di caricamento modelli con supporto sia a Lista che a Griglia
+        async function caricaModelli(categoria) {
+            let url = '/modelli';
+            if (categoria) url += `?categoria=${categoria}`;
+            
+            const response = await fetch(url);
+            const modelli = await response.json();
+            
+            const lista = document.getElementById('listaModelli');
+            lista.innerHTML = '';
+            lista.classList.toggle('list', currentView === 'list'); // Applica o rimuove la classe list
+
+            modelli.forEach(m => {
+                const title = escapeHtml(m.titolo);
+                const category = escapeHtml(m.categoria);
+                const note = escapeHtml(m.note || 'No notes available.');
+                const data = escapeHtml(m.data_scoperta || 'No specific date available.');
+
+                if (currentView === 'list') {
+                    lista.innerHTML += `
+                        <div class="item-card">
+                            <div class="list-content">
+                                <h4>${title}</h4>
+                                <h5>${category}</h5>
+                                <h5>${data}</h5>
+                                <h5>${note}</h5>
+                            </div>
+                            <div class="more">
+                                <button class="more-button" onclick="toggleMenu(event, '${m.id}')"><img src="/static/icons/more.png" alt="page" style="width:15px; height:15px; vertical-align:-3px;"></button>
+                                <div class="more-content" id="menu-${m.id}">
+                                    <a href="/download/${m.id}">Download</a>
+                                    <button type="button" class="delete-action" onclick="deleteModel(event, '${m.id}')">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    lista.innerHTML += `
+                        <div class="item-card archive-item">
+                            <div class="preview-box">Anteprima</div>
+                            <div class="archive-details">
+                                <h3><strong>${title}</strong> - ${category}</h3>
+                                <b>${data}</b>
+                            </div>
+                            <div class="more">
+                                <button class="more-button" onclick="toggleMenu(event, '${m.id}')"><img src="/static/icons/more.png" alt="page" style="width:15px; height:15px; "></button>
+                                <div class="more-content" id="menu-${m.id}">
+                                    <a href="/download/${m.id}">Download</a>
+                                    <button type="button" onclick="toggleNotes(event, '${m.id}')">Notes</button>
+                                    <button type="button" class="delete-action" onclick="deleteModel(event, '${m.id}')">Delete</button>
+                                </div>
+                                <div class="notes-bubble" id="notes-${m.id}">${note}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function escapeHtml(text) {
+            return String(text).replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            }[char]));
+        }
+
+        function closeMenus() {
+            document.querySelectorAll('.more-content.open, .notes-bubble.open').forEach(el => {
+                el.classList.remove('open');
+            });
+        }
+
+        function toggleMenu(event, id) {
+            event.stopPropagation();
+            const menu = document.getElementById(`menu-${id}`);
+            const wasOpen = menu.classList.contains('open');
+            closeMenus();
+            if (!wasOpen) menu.classList.add('open');
+        }
+
+        function toggleNotes(event, id) {
+            event.stopPropagation();
+            const notes = document.getElementById(`notes-${id}`);
+            notes.classList.toggle('open');
+        }
+
+        async function deleteModel(event, id) {
+            event.stopPropagation();
+            if (!confirm('Delete this file from the archive?')) return;
+
+            const response = await fetch(`/modelli/${id}`, { method: 'DELETE' });
+            if (response.ok) {
+                caricaModelli(currentFilter);
+            } else {
+                alert('Error occurred while deleting.');
+            }
+        }
+
+        document.addEventListener('click', closeMenus);
+
+        // Gestione Filtri Attivi
+        function setFilter(btn, categoria) {
+            currentFilter = categoria;
+            const container = document.getElementById('filtri');
+            Array.from(container.querySelectorAll('.filter-btn')).forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            caricaModelli(categoria);
+        }
+
+        // Cambio Vista (Griglia / Lista)
+        function setView(view, btn) {
+            currentView = view;
+            const container = document.getElementById('viewControls');
+            Array.from(container.querySelectorAll('.filter-btn')).forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            caricaModelli(currentFilter);
+        }
+
+        // Carica tutto all'avvio
+        caricaModelli('');
+    </script>
+</body>
+</html>
