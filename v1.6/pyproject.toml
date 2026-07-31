@@ -8,4 +8,20 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi==0.100.0",
     "uvicorn==0.22.0",
+    "starlette>=0.47.0",
+
+    # HTML Templates
+    "jinja2>=3.1.4",
+
+    # Multipart/form-data (UploadFile, Form)
+    "python-multipart>=0.0.20",
+
+    # Variabili d'ambiente
+    "python-dotenv>=1.1.1",
+
+    # Validazione
+    "pydantic>=2.11.0",
+
+    # HTTP client (se fai richieste verso altre API)
+    "httpx>=0.28.1",
 ]
