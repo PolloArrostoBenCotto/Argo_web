@@ -791,3 +791,7 @@ async def download_cv_lilly():
     if os.path.exists(cv_path):
         return FileResponse(path=cv_path, filename="Liliana_Albanese_CV.pdf", media_type='application/pdf')
     return {"error": "File not found"}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
