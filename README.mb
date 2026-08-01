@@ -1,13 +1,3 @@
-VERSION LOG
-1.0 - archive only, newfile over archive
-1.1 - archive only, side by side
-1.2 - homepage, archive and newfile side by side
-1.3 - newfile and new folder in separate pages, new research missing
-1.4 - full functionality, only home and archive
-1.5 - team and support pages, different body font
-1.6 - search and details, web deployment
-_______________________________________________________________________
-
 # 🏛️ ARGOchive — Argo Web Application
 
 [![Live Demo](https://img.shields.io/badge/Demo-argoproject.vercel.app-blueviolet?style=for-the-badge&logo=vercel)](https://argoproject.vercel.app/)
@@ -68,3 +58,13 @@ Follow these instructions to run the web application locally.
    git clone [https://github.com/PolloArrostoBenCotto/Argo_web.git](https://github.com/PolloArrostoBenCotto/Argo_web.git)
    cd Argo_web
    run startApp.bat and then ngrok.bat as admin, copy the link in the cmd window and past it in the url.
+
+### VERSION LOG
+1.0 - archive only, newfile over archive
+1.1 - archive only, side by side
+1.2 - homepage, archive and newfile side by side
+1.3 - newfile and new folder in separate pages, new research missing
+1.4 - full functionality, only home and archive
+1.5 - team and support pages, different body font
+1.6 - search and details, web deployment
+_______________________________________________________________________
