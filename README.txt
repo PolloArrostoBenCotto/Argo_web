@@ -67,4 +67,3 @@ Follow these instructions to run the web application locally.
 1.4 - full functionality, only home and archive
 1.5 - team and support pages, different body font
 1.6 - search and details, web deployment
-_______________________________________________________________________
