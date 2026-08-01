@@ -42,23 +42,6 @@ Designed and built by high school students passionate about robotics, mechanics,
 
 ---
 
-## 🚀 Getting Started
-
-Follow these instructions to run the web application locally.
-
-### Prerequisites
-
-- **Node.js** (v16.x or later) / **Python** (v3.9+ for backend development)
-- **Git**
-
-### Installation & Setup
-
-1. **Clone the repository:**
-   ```bash
-   git clone [https://github.com/PolloArrostoBenCotto/Argo_web.git](https://github.com/PolloArrostoBenCotto/Argo_web.git)
-   cd Argo_web
-   run startApp.bat and then ngrok.bat as admin, copy the link in the cmd window and past it in the url.
-
 ### VERSION LOG
 1.0 - archive only, newfile over archive
 1.1 - archive only, side by side
