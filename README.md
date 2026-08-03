@@ -31,11 +31,11 @@ Designed and built by high school students passionate about robotics, mechanics,
 ## 🛠️ Architecture & Tech Stack
 
 ### Site
-- **Frontend:** HTML5, CSS3, JavaScript (Deployed on **Vercel**)
-- **Backend:** **FastAPI** (Python) for fast data throughput and point cloud manipulation
+- **Frontend:** HTML5, CSS3, JavaScript (Deployed on **Vercel**).
+- **Backend:** **FastAPI** (Python) for fast data throughput and point cloud manipulation.
 
 ### Software
-- **3D Rendering:** OPENMVG / OPENMVS, rmbg to clean the images
+- **3D Rendering:** OPENMVG / OPENMVS, rmbg to clean the images.
 - **Rover control:** C++ and Python, using Arduino UNO, RaspberryPi and ESPs.
 
 ### Hardware & System Integration
