@@ -1,4 +1,4 @@
-# :octocat: ARGOchive — Online archive of the ARGO project!
+# :octocat: ARGOchive - Online archive of the ARGO project!
 
 [![Live Demo](https://img.shields.io/badge/Demo-argoproject.vercel.app-orange?style=for-the-badge&logo=vercel)](https://argoproject.vercel.app/)
 [![Stardance Ready](https://img.shields.io/badge/Submission-Stardance-blue?style=for-the-badge)](https://stardance.hackclub.com/projects/39048)
