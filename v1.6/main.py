@@ -13,10 +13,8 @@ from typing import List, Optional
 app = FastAPI()
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Montiamo la cartella degli statici per CSS e Font
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
-# Configuriamo Jinja2 per leggere i file HTML nella cartella templates
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 UPLOAD_DIR = os.path.join(BASE_DIR, "archived_files")
@@ -365,17 +363,14 @@ inizializza_db()
 
 @app.get("/", response_class=HTMLResponse)
 async def home_page(request: Request):
-    # Rende la pagina principale (Landing Page)
     return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/archivio", response_class=HTMLResponse)
 async def archivio_page(request: Request):
-    # Rende la pagina di gestione dei file .PLY
     return templates.TemplateResponse("archivio.html", {"request": request})
 
 @app.get("/newfile", response_class=HTMLResponse)
 async def new_file_page(request: Request):
-    # Rende la pagina per caricare un nuovo file .PLY
     return templates.TemplateResponse("newfile.html", {"request": request})
 
 @app.get("/newfolder", response_class=HTMLResponse)
